@@ -6,6 +6,6 @@
     "vercel-build": "chmod +x install.sh && ./install.sh"
   },
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   }
 }
