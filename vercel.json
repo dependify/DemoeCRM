@@ -1,8 +1,8 @@
 {
   "version": 2,
   "name": "evangelism-crm-demo",
-  "buildCommand": "./install.sh",
-  "installCommand": "if [ -f install.sh ]; then chmod +x install.sh && ./install.sh; else pip install -r requirements.txt; fi",
+  "installCommand": "chmod +x install.sh && ./install.sh",
+  "outputDirectory": ".",
   "framework": null,
   "rewrites": [
     {
