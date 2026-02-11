@@ -1,0 +1,11 @@
+{
+  "name": "evangelism-crm-demo",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'Build step complete'",
+    "vercel-build": "chmod +x install.sh && ./install.sh"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
