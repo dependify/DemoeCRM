@@ -773,23 +773,156 @@ function Analytics() {
     );
 }
 
-// Test Voice Agent Component - ElevenLabs Widget Embed
+// Test Voice Agent Component - Custom Styled ElevenLabs Widget
 function TestVoiceAgent() {
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [isCallActive, setIsCallActive] = useState(false);
+    
     useEffect(() => {
         if (!document.getElementById('elevenlabs-widget-script')) {
             const script = document.createElement('script');
             script.id = 'elevenlabs-widget-script';
             script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
             script.async = true;
+            script.onload = () => setIsLoaded(true);
             document.body.appendChild(script);
+        } else {
+            setIsLoaded(true);
         }
+        
+        // Listen for widget events
+        const handleCallStart = () => setIsCallActive(true);
+        const handleCallEnd = () => setIsCallActive(false);
+        
+        window.addEventListener('elevenlabs-convai:call-start', handleCallStart);
+        window.addEventListener('elevenlabs-convai:call-end', handleCallEnd);
+        
+        return () => {
+            window.removeEventListener('elevenlabs-convai:call-start', handleCallStart);
+            window.removeEventListener('elevenlabs-convai:call-end', handleCallEnd);
+        };
     }, []);
     
     return (
-        <div className="p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Test Voice Agent</h2>
-            <p className="text-gray-600 mb-8">Click the microphone button in the bottom right corner to start a conversation.</p>
-            <elevenlabs-convai agent-id="agent_1501kh6b7rt7e1d9kfw8c2jwa7rc"></elevenlabs-convai>
+        <div className="p-8 max-w-4xl mx-auto">
+            {/* Header Section */}
+            <div className="text-center mb-10">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full shadow-lg mb-4">
+                    <i className="fas fa-microphone-alt text-white text-3xl"></i>
+                </div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">AI Voice Agent</h2>
+                <p className="text-gray-500">Powered by ElevenLabs Conversational AI</p>
+            </div>
+            
+            {/* Main Card */}
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                {/* Status Bar */}
+                <div className={`px-6 py-4 border-b flex items-center justify-between transition-colors ${isCallActive ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-100'}`}>
+                    <div className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${isCallActive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+                        <span className={`font-medium ${isCallActive ? 'text-green-700' : 'text-gray-600'}`}>
+                            {isCallActive ? 'Call in Progress' : 'Ready to Connect'}
+                        </span>
+                    </div>
+                    {isCallActive && (
+                        <span className="text-sm text-green-600 font-medium">
+                            <i className="fas fa-clock mr-1"></i> Speaking...
+                        </span>
+                    )}
+                </div>
+                
+                {/* Widget Container */}
+                <div className="p-8 flex flex-col items-center">
+                    {!isLoaded ? (
+                        <div className="flex flex-col items-center py-12">
+                            <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin mb-4"></div>
+                            <p className="text-gray-500">Loading Voice Agent...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Custom Widget Wrapper */}
+                            <div className="relative w-full max-w-md">
+                                {/* Decorative Rings */}
+                                <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ${isCallActive ? 'opacity-100' : 'opacity-0'}`}>
+                                    <div className="w-48 h-48 border-2 border-amber-200 rounded-full animate-ping absolute"></div>
+                                    <div className="w-40 h-40 border border-amber-300 rounded-full animate-pulse absolute"></div>
+                                </div>
+                                
+                                {/* ElevenLabs Widget - Hidden but functional */}
+                                <div className="relative z-10 flex justify-center">
+                                    <elevenlabs-convai 
+                                        agent-id="agent_1501kh6b7rt7e1d9kfw8c2jwa7rc"
+                                        class="custom-voice-widget"
+                                    ></elevenlabs-convai>
+                                </div>
+                            </div>
+                            
+                            {/* Instructions */}
+                            <div className="mt-8 text-center max-w-lg">
+                                <h3 className="font-semibold text-gray-800 mb-3">
+                                    {isCallActive ? 'Conversation Active' : 'How to Use'}
+                                </h3>
+                                <div className="grid grid-cols-3 gap-4 text-sm">
+                                    <div className="p-4 bg-amber-50 rounded-xl">
+                                        <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <i className="fas fa-microphone text-amber-600"></i>
+                                        </div>
+                                        <p className="text-gray-600">Click the mic button to start</p>
+                                    </div>
+                                    <div className="p-4 bg-blue-50 rounded-xl">
+                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <i className="fas fa-comments text-blue-600"></i>
+                                        </div>
+                                        <p className="text-gray-600">Speak naturally with the AI</p>
+                                    </div>
+                                    <div className="p-4 bg-green-50 rounded-xl">
+                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                            <i className="fas fa-hand-paper text-green-600"></i>
+                                        </div>
+                                        <p className="text-gray-600">Click again to end the call</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+                
+                {/* Tips Section */}
+                <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                    <div className="flex items-start gap-3">
+                        <i className="fas fa-lightbulb text-amber-500 mt-1"></i>
+                        <div className="text-sm text-gray-600">
+                            <span className="font-medium text-gray-700">Tip:</span> Speak clearly and at a moderate pace. 
+                            The AI can help with convert follow-ups, prayer requests, and general church information.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {/* Custom CSS for the widget */}
+            <style>{`
+                .custom-voice-widget {
+                    --elevenlabs-widget-bg: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+                    --elevenlabs-widget-color: white;
+                    --elevenlabs-widget-size: 80px;
+                    --elevenlabs-widget-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.5);
+                }
+                .custom-voice-widget button {
+                    width: 80px !important;
+                    height: 80px !important;
+                    border-radius: 50% !important;
+                    background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
+                    box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.5) !important;
+                    transition: transform 0.2s, box-shadow 0.2s !important;
+                }
+                .custom-voice-widget button:hover {
+                    transform: scale(1.05) !important;
+                    box-shadow: 0 15px 30px -5px rgba(245, 158, 11, 0.6) !important;
+                }
+                .custom-voice-widget button:active {
+                    transform: scale(0.95) !important;
+                }
+            `}</style>
         </div>
     );
 }
