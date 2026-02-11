@@ -1534,11 +1534,17 @@ async def serve_root():
     """)
 
 # Catch-all for other non-API routes (SPA support)
+# This must be defined AFTER all API routes
 @app.get("/{path:path}", response_class=HTMLResponse)
-async def serve_spa(path: str):
+async def serve_spa(path: str, request):
     """Serve the frontend for any non-API, non-static path (SPA routing)."""
-    # Skip API routes and static files
-    if path.startswith("api/") or "." in path:
+    # Skip API routes - check the actual request path
+    full_path = str(request.url.path)
+    if full_path.startswith("/api/"):
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    # Skip static files (paths with file extensions)
+    if "." in path and not path.endswith("/"):
         raise HTTPException(status_code=404, detail="Not found")
     
     # Serve index.html for all other routes
