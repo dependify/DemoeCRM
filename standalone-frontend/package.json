@@ -1,0 +1,13 @@
+{
+  "name": "evangelism-crm-demo-frontend",
+  "version": "1.0.0",
+  "description": "Standalone Demo Frontend for Evangelism CRM",
+  "scripts": {
+    "start": "npx http-server -p 3000 -c-1",
+    "dev": "npx http-server -p 3000 -c-1 -o",
+    "build": "mkdir -p dist && cp index.html dist/"
+  },
+  "keywords": ["evangelism", "crm", "church", "demo"],
+  "author": "Grace Evangelical Ministries",
+  "license": "MIT"
+}

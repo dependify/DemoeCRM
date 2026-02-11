@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evangelism CRM - Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #d97706;
+            --primary-dark: #b45309;
+            --secondary: #0d9488;
+        }
+        .bg-primary { background-color: var(--primary); }
+        .bg-primary-dark { background-color: var(--primary-dark); }
+        .text-primary { color: var(--primary); }
+        .border-primary { border-color: var(--primary); }
+        .hover\:bg-primary-dark:hover { background-color: var(--primary-dark); }
+        .bg-secondary { background-color: var(--secondary); }
+        .text-secondary { color: var(--secondary); }
+        
+        .health-score-ring {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .score-excellent { background: #dcfce7; color: #166534; border: 3px solid #22c55e; }
+        .score-good { background: #fef9c3; color: #854d0e; border: 3px solid #eab308; }
+        .score-fair { background: #ffedd5; color: #9a3412; border: 3px solid #f97316; }
+        .score-poor { background: #fee2e2; color: #991b1b; border: 3px solid #ef4444; }
+        
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+const { useState, useEffect } = React;
+
+const API_URL = 'http://localhost:8000/api';
+
+const api = {
+    async request(endpoint, options = {}) {
+        const token = localStorage.getItem('token');
+        const url = `${API_URL}${endpoint}`;
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` })
+            },
+            ...options
+        };
+        if (config.body && typeof config.body === 'object') {
+            config.body = JSON.stringify(config.body);
+        }
+        const response = await fetch(url, config);
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.reload();
+            return;
+        }
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+            throw new Error(error.detail || `HTTP ${response.status}`);
+        }
+        return response.json();
+    },
+    get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+    post(endpoint, body) { return this.request(endpoint, { method: 'POST', body }); },
+    patch(endpoint, body) { return this.request(endpoint, { method: 'PATCH', body }); }
+};
+
+// Login Component
+function Login({ onLogin }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        try {
+            const data = await api.post('/auth/login', { email, password });
+            localStorage.setItem('token', data.access_token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            onLogin(data.user);
+        } catch (err) {
+            setError(err.message || 'Login failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
+            <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+                <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i className="fas fa-church text-white text-2xl"></i>
+                    </div>
+                    <h1 className="text-2xl font-bold text-gray-800">Grace Evangelical Ministries</h1>
+                    <p className="text-gray-500">Evangelism CRM - Demo</p>
+                </div>
+                {error && (
+                    <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
+                        <i className="fas fa-exclamation-circle mr-2"></i>{error}
+                    </div>
+                )}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Enter your email" autoComplete="off" required />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Enter your password" autoComplete="new-password" required />
+                    </div>
+                    <button type="submit" disabled={loading} className="w-full bg-primary text-white py-2 rounded-lg hover:bg-primary-dark disabled:opacity-50">
+                        {loading ? <span><i className="fas fa-spinner fa-spin mr-2"></i>Logging in...</span> : 'Sign In'}
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    );
+}
+
+// Sidebar Component
+function Sidebar({ activeTab, setActiveTab, user }) {
+    const menuItems = [
+        { id: 'dashboard', icon: 'fa-home', label: 'Dashboard' },
+        { id: 'kanban', icon: 'fa-columns', label: 'Kanban Board' },
+        { id: 'converts', icon: 'fa-users', label: 'Converts' },
+        { id: 'alerts', icon: 'fa-bell', label: 'Alerts' },
+        { id: 'voice-agent', icon: 'fa-phone-alt', label: 'Voice Agent' },
+        { id: 'test-voice-agent', icon: 'fa-microphone', label: 'Test Voice Agent' },
+        { id: 'analytics', icon: 'fa-chart-bar', label: 'Analytics' },
+    ];
+    
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.reload();
+    };
+    
+    return (
+        <div className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 flex flex-col">
+            <div className="p-6 border-b">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <i className="fas fa-church text-white"></i>
+                    </div>
+                    <div>
+                        <h2 className="font-bold text-gray-800">Grace Evangelical</h2>
+                        <p className="text-xs text-gray-500">Evangelism CRM</p>
+                    </div>
+                </div>
+            </div>
+            <nav className="flex-1 p-4">
+                <ul className="space-y-2">
+                    {menuItems.map(item => (
+                        <li key={item.id}>
+                            <button onClick={() => setActiveTab(item.id)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === item.id ? 'bg-amber-50 text-primary' : 'text-gray-600 hover:bg-gray-50'}`}>
+                                <i className={`fas ${item.icon} w-5`}></i>
+                                <span>{item.label}</span>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+            <div className="p-4 border-t">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                        <i className="fas fa-user text-gray-500"></i>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-800 truncate">{user?.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                    </div>
+                </div>
+                <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg">
+                    <i className="fas fa-sign-out-alt"></i><span>Logout</span>
+                </button>
+            </div>
+        </div>
+    );
+}
+
+// Dashboard Component
+function Dashboard() {
+    const [stats, setStats] = useState(null);
+    const [stageDist, setStageDist] = useState({});
+    const [recentActivity, setRecentActivity] = useState([]);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        Promise.all([
+            api.get('/dashboard/stats'),
+            api.get('/dashboard/stage-distribution'),
+            api.get('/dashboard/recent-activity')
+        ]).then(([statsData, stageData, activityData]) => {
+            setStats(statsData);
+            setStageDist(stageData);
+            setRecentActivity(activityData);
+            setLoading(false);
+        });
+    }, []);
+    
+    if (loading) return <div className="flex items-center justify-center h-64"><i className="fas fa-spinner fa-spin text-3xl text-primary"></i></div>;
+    
+    const getStageLabel = (stage) => {
+        const labels = { new: 'New', in_followup: 'In Follow-up', in_classes: 'In Classes', in_house_fellowship: 'House Fellowship', established: 'Established', handed_over: 'Handed Over', inactive: 'Inactive' };
+        return labels[stage] || stage;
+    };
+    
+    return (
+        <div className="space-y-6">
+            <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+            
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-500 text-sm">Total Converts</p>
+                            <p className="text-3xl font-bold text-gray-800">{stats?.total_converts || 0}</p>
+                        </div>
+                        <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center"><i className="fas fa-users text-blue-500 text-xl"></i></div>
+                    </div>
+                    <p className="text-green-500 text-sm mt-2"><i className="fas fa-arrow-up mr-1"></i>{stats?.new_this_month || 0} new this month</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-500 text-sm">At Risk</p>
+                            <p className="text-3xl font-bold text-red-600">{stats?.at_risk || 0}</p>
+                        </div>
+                        <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center"><i className="fas fa-exclamation-triangle text-red-500 text-xl"></i></div>
+                    </div>
+                    <p className="text-gray-400 text-sm mt-2">Need immediate attention</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-500 text-sm">Avg Health Score</p>
+                            <p className="text-3xl font-bold text-gray-800">{stats?.average_health_score || 0}</p>
+                        </div>
+                        <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center"><i className="fas fa-heartbeat text-green-500 text-xl"></i></div>
+                    </div>
+                    <p className="text-gray-400 text-sm mt-2">Out of 100 points</p>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-500 text-sm">Open Alerts</p>
+                            <p className="text-3xl font-bold text-orange-600">{stats?.open_alerts || 0}</p>
+                        </div>
+                        <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center"><i className="fas fa-bell text-orange-500 text-xl"></i></div>
+                    </div>
+                    <p className="text-gray-400 text-sm mt-2">Awaiting action</p>
+                </div>
+            </div>
+            
+            {/* Stage Distribution and Recent Activity */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <h3 className="font-bold text-gray-800 mb-4">Converts by Stage</h3>
+                    <div className="space-y-3">
+                        {Object.entries(stageDist).map(([stage, count]) => (
+                            <div key={stage} className="flex items-center">
+                                <span className="w-32 text-sm text-gray-600 capitalize">{getStageLabel(stage)}</span>
+                                <div className="flex-1 mx-3">
+                                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(count / (stats?.total_converts || 1)) * 100}%` }}></div>
+                                    </div>
+                                </div>
+                                <span className="w-10 text-sm font-medium text-gray-800">{count}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <h3 className="font-bold text-gray-800 mb-4">Recent Activity</h3>
+                    <div className="space-y-4 max-h-80 overflow-y-auto">
+                        {recentActivity.map((activity, index) => (
+                            <div key={index} className="flex items-start gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activity.type === 'voice_call' ? 'bg-purple-50 text-purple-500' : 'bg-blue-50 text-blue-500'}`}>
+                                    <i className={`fas ${activity.type === 'voice_call' ? 'fa-phone' : 'fa-user-plus'} text-sm`}></i>
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm text-gray-800">{activity.message}</p>
+                                    <p className="text-xs text-gray-400">{new Date(activity.timestamp).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// KanbanBoard Component
+function KanbanBoard() {
+    const [converts, setConverts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [draggedConvert, setDraggedConvert] = useState(null);
+    
+    useEffect(() => {
+        loadConverts();
+    }, []);
+    
+    const loadConverts = async () => {
+        try {
+            const data = await api.get('/converts');
+            setConverts(data);
+        } catch (err) {
+            console.error('Error loading converts:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleStageChange = async (convertId, newStage) => {
+        try {
+            await api.patch(`/converts/${convertId}`, { stage: newStage });
+            setConverts(converts.map(c => c.id === convertId ? { ...c, stage: newStage } : c));
+        } catch (err) {
+            console.error('Error updating stage:', err);
+            alert('Failed to update stage');
+        }
+    };
+    
+    const handleDragStart = (convert) => setDraggedConvert(convert);
+    const handleDragOver = (e) => e.preventDefault();
+    const handleDrop = (e, newStage) => {
+        e.preventDefault();
+        if (draggedConvert && draggedConvert.stage !== newStage) {
+            handleStageChange(draggedConvert.id, newStage);
+            setDraggedConvert(null);
+        }
+    };
+    
+    const getHealthScoreClass = (score) => {
+        if (score >= 80) return 'score-excellent';
+        if (score >= 60) return 'score-good';
+        if (score >= 40) return 'score-fair';
+        return 'score-poor';
+    };
+    
+    const kanbanColumns = [
+        { id: 'new', label: 'New', color: 'bg-orange-50', borderColor: 'border-orange-200', headerColor: 'bg-orange-500' },
+        { id: 'in_followup', label: 'In Follow-up', color: 'bg-yellow-50', borderColor: 'border-yellow-200', headerColor: 'bg-yellow-500' },
+        { id: 'in_classes', label: 'In Classes', color: 'bg-blue-50', borderColor: 'border-blue-200', headerColor: 'bg-blue-500' },
+        { id: 'in_house_fellowship', label: 'House Fellowship', color: 'bg-purple-50', borderColor: 'border-purple-200', headerColor: 'bg-purple-500' },
+        { id: 'established', label: 'Established', color: 'bg-green-50', borderColor: 'border-green-200', headerColor: 'bg-green-500' },
+        { id: 'inactive', label: 'Inactive', color: 'bg-gray-50', borderColor: 'border-gray-200', headerColor: 'bg-gray-500' },
+    ];
+    
+    if (loading) return <div className="flex items-center justify-center h-64"><i className="fas fa-spinner fa-spin text-3xl text-primary"></i></div>;
+    
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800">Kanban Board</h1>
+                    <p className="text-gray-500">Drag and drop converts between stages</p>
+                </div>
+                <span className="text-sm text-gray-500">Total: {converts.length} converts</span>
+            </div>
+            
+            <div className="flex gap-4 overflow-x-auto pb-4" style={{ minHeight: '70vh' }}>
+                {kanbanColumns.map(column => {
+                    const columnConverts = converts.filter(c => c.stage === column.id);
+                    return (
+                        <div key={column.id} className={`flex-shrink-0 w-72 ${column.color} rounded-xl border-2 ${column.borderColor}`} onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, column.id)}>
+                            <div className={`${column.headerColor} text-white px-4 py-3 rounded-t-lg flex items-center justify-between`}>
+                                <span className="font-semibold">{column.label}</span>
+                                <span className="bg-white/20 px-2 py-1 rounded-full text-sm">{columnConverts.length}</span>
+                            </div>
+                            <div className="p-3 space-y-3 min-h-[500px]">
+                                {columnConverts.map(convert => (
+                                    <div key={convert.id} draggable onDragStart={() => handleDragStart(convert)} className="bg-white rounded-lg p-4 shadow-sm cursor-pointer hover:shadow-md border border-gray-200">
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">{convert.first_name[0]}{convert.last_name[0]}</div>
+                                                <div>
+                                                    <p className="font-medium text-gray-800 text-sm">{convert.first_name} {convert.last_name}</p>
+                                                    <p className="text-xs text-gray-500">{convert.occupation || '-'}</p>
+                                                </div>
+                                            </div>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${getHealthScoreClass(convert.health_score || 0)}`}>{convert.health_score || '-'}</div>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500"><i className="fas fa-phone"></i><span>{convert.phone}</span></div>
+                                    </div>
+                                ))}
+                                {columnConverts.length === 0 && <div className="text-center py-8 text-gray-400"><i className="fas fa-inbox text-3xl mb-2"></i><p className="text-sm">No converts</p></div>}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+// Converts Component - CARD VIEW with Health Scores
+function Converts() {
+    const [converts, setConverts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    
+    useEffect(() => {
+        loadConverts();
+    }, []);
+    
+    const loadConverts = async () => {
+        try {
+            const data = await api.get('/converts');
+            setConverts(data);
+        } catch (err) {
+            console.error('Error loading converts:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleStageChange = async (convertId, newStage) => {
+        try {
+            await api.patch(`/converts/${convertId}`, { stage: newStage });
+            setConverts(converts.map(c => c.id === convertId ? { ...c, stage: newStage } : c));
+        } catch (err) {
+            console.error('Error updating stage:', err);
+            alert('Failed to update stage');
+        }
+    };
+    
+    const getHealthScoreClass = (score) => {
+        if (score >= 80) return 'score-excellent';
+        if (score >= 60) return 'score-good';
+        if (score >= 40) return 'score-fair';
+        return 'score-poor';
+    };
+    
+    const getStageColor = (stage) => {
+        const colors = { new: 'bg-orange-100 text-orange-800', in_followup: 'bg-green-100 text-green-800', in_classes: 'bg-blue-100 text-blue-800', in_house_fellowship: 'bg-purple-100 text-purple-800', established: 'bg-teal-100 text-teal-800', handed_over: 'bg-gray-100 text-gray-800', inactive: 'bg-red-100 text-red-800' };
+        return colors[stage] || 'bg-gray-100';
+    };
+    
+    const filteredConverts = converts.filter(c => `${c.first_name} ${c.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) || c.phone.includes(searchTerm));
+    
+    if (loading) return <div className="flex items-center justify-center h-64"><i className="fas fa-spinner fa-spin text-3xl text-primary"></i></div>;
+    
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-gray-800">Converts</h1>
+                <input type="text" placeholder="Search converts..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="px-4 py-2 border border-gray-200 rounded-lg w-64" />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredConverts.map(convert => (
+                    <div key={convert.id} className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold">{convert.first_name[0]}{convert.last_name[0]}</div>
+                                <div>
+                                    <h3 className="font-semibold text-gray-800">{convert.first_name} {convert.last_name}</h3>
+                                    <p className="text-sm text-gray-500">{convert.occupation || 'No occupation'}</p>
+                                </div>
+                            </div>
+                            <div className={`health-score-ring ${getHealthScoreClass(convert.health_score || 0)}`}>{convert.health_score || '-'}</div>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2 text-gray-600"><i className="fas fa-phone text-gray-400 w-4"></i><span>{convert.phone}</span></div>
+                            <div className="flex items-center gap-2 text-gray-600"><i className="fas fa-map-marker-alt text-gray-400 w-4"></i><span>{convert.city || '-'}, {convert.state || '-'}</span></div>
+                        </div>
+                        
+                        <div className="mt-4 flex items-center justify-between">
+                            <select value={convert.stage} onChange={(e) => handleStageChange(convert.id, e.target.value)} className={`text-xs px-3 py-1 rounded-full border-0 cursor-pointer ${getStageColor(convert.stage)}`}>
+                                {Object.entries({ new: 'New', in_followup: 'In Follow-up', in_classes: 'In Classes', in_house_fellowship: 'In House Fellowship', established: 'Established', inactive: 'Inactive' }).map(([key, label]) => (
+                                    <option key={key} value={key}>{label}</option>
+                                ))}
+                            </select>
+                            <button className="text-primary hover:text-primary-dark text-sm"><i className="fas fa-eye mr-1"></i> View</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// Voice Agent Component - WITH TABS
+function VoiceAgent() {
+    const [calls, setCalls] = useState([]);
+    const [scripts, setScripts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('calls');
+    
+    useEffect(() => {
+        loadData();
+    }, []);
+    
+    const loadData = async () => {
+        try {
+            const [callsData, scriptsData] = await Promise.all([api.get('/voice-agent/calls'), api.get('/voice-agent/scripts')]);
+            setCalls(callsData);
+            setScripts(scriptsData);
+        } catch (err) {
+            console.error('Error loading voice agent data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleSimulateCall = async (callId) => {
+        try {
+            await api.post(`/voice-agent/calls/${callId}/simulate`, {});
+            loadData();
+        } catch (err) {
+            console.error('Error simulating call:', err);
+        }
+    };
+    
+    const getStatusColor = (status) => {
+        const colors = { completed: 'bg-green-100 text-green-700', scheduled: 'bg-blue-100 text-blue-700', in_progress: 'bg-yellow-100 text-yellow-700', failed: 'bg-red-100 text-red-700', no_answer: 'bg-gray-100 text-gray-700' };
+        return colors[status] || 'bg-gray-100';
+    };
+    
+    if (loading) return <div className="flex items-center justify-center h-64"><i className="fas fa-spinner fa-spin text-3xl text-primary"></i></div>;
+    
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-3"><i className="fas fa-robot text-primary"></i>Voice Agent</h1>
+                    <p className="text-gray-500">AI-powered voice calling for convert follow-up</p>
+                </div>
+                <div className="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-lg">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span className="font-medium">Agent Active</span>
+                </div>
+            </div>
+            
+            <div className="flex gap-4 border-b">
+                {['calls', 'scripts'].map(tab => (
+                    <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-3 font-medium capitalize transition-colors ${activeTab === tab ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}>{tab}</button>
+                ))}
+            </div>
+            
+            {activeTab === 'calls' && (
+                <div className="space-y-4">
+                    {calls.map(call => (
+                        <div key={call.id} className="bg-white rounded-xl shadow-sm p-6">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(call.status)}`}>{call.status.replace('_', ' ')}</span>
+                                        {call.outcome && <span className="text-sm text-gray-500">Outcome: <span className="font-medium capitalize">{call.outcome}</span></span>}
+                                    </div>
+                                    <h3 className="font-semibold text-lg text-gray-800">{call.convert_name}</h3>
+                                    <p className="text-gray-500"><i className="fas fa-phone mr-2"></i>{call.convert_phone}</p>
+                                    {call.duration_seconds && <p className="text-sm text-gray-400 mt-1"><i className="fas fa-clock mr-1"></i>Duration: {Math.round(call.duration_seconds / 60)} minutes</p>}
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    {call.status === 'scheduled' && <button onClick={() => handleSimulateCall(call.id)} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"><i className="fas fa-play mr-2"></i>Simulate</button>}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+            
+            {activeTab === 'scripts' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {scripts.map(script => (
+                        <div key={script.id} className="bg-white rounded-xl shadow-sm p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-semibold text-gray-800">{script.name}</h3>
+                                <span className="text-xs text-gray-500 capitalize">{script.purpose}</span>
+                            </div>
+                            <p className="text-gray-600 text-sm p-4 bg-gray-50 rounded-lg">"{script.content}"</p>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// Alerts Component
+function Alerts() {
+    const [alerts, setAlerts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('all');
+    
+    useEffect(() => {
+        loadAlerts();
+    }, []);
+    
+    const loadAlerts = async () => {
+        try {
+            const data = await api.get('/alerts');
+            setAlerts(data);
+        } catch (err) {
+            console.error('Error loading alerts:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleAcknowledge = async (id) => {
+        await api.patch(`/alerts/${id}/acknowledge`, {});
+        setAlerts(alerts.map(a => a.id === id ? { ...a, status: 'acknowledged' } : a));
+    };
+    
+    const handleResolve = async (id) => {
+        await api.patch(`/alerts/${id}/resolve`, {});
+        setAlerts(alerts.map(a => a.id === id ? { ...a, status: 'resolved' } : a));
+    };
+    
+    const getSeverityColor = (severity) => ({ high: 'border-red-500 bg-red-50', medium: 'border-yellow-500 bg-yellow-50', low: 'border-green-500 bg-green-50' }[severity] || 'border-gray-500');
+    const getSeverityBadge = (severity) => ({ high: 'bg-red-100 text-red-700', medium: 'bg-yellow-100 text-yellow-700', low: 'bg-green-100 text-green-700' }[severity] || 'bg-gray-100');
+    
+    const filteredAlerts = alerts.filter(a => filter === 'all' || a.status === filter);
+    
+    if (loading) return <div className="flex items-center justify-center h-64"><i className="fas fa-spinner fa-spin text-3xl text-primary"></i></div>;
+    
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-gray-800">Alerts</h1>
+                <div className="flex gap-2">
+                    {['all', 'open', 'acknowledged', 'resolved'].map(f => (
+                        <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 rounded-lg text-sm capitalize ${filter === f ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>{f}</button>
+                    ))}
+                </div>
+            </div>
+            
+            <div className="space-y-4">
+                {filteredAlerts.map(alert => (
+                    <div key={alert.id} className={`bg-white rounded-xl shadow-sm p-5 border-l-4 ${getSeverityColor(alert.severity)}`}>
+                        <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-semibold text-gray-800">{alert.title}</h3>
+                                    <span className={`px-2 py-1 rounded-full text-xs ${getSeverityBadge(alert.severity)}`}>{alert.severity}</span>
+                                    <span className={`px-2 py-1 rounded-full text-xs ${alert.status === 'open' ? 'bg-blue-100 text-blue-700' : alert.status === 'acknowledged' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>{alert.status}</span>
+                                </div>
+                                <p className="text-gray-600 mb-2">{alert.message}</p>
+                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                                    <span><i className="fas fa-user mr-1"></i>{alert.convert_name}</span>
+                                    <span><i className="fas fa-clock mr-1"></i>{new Date(alert.created_at).toLocaleString()}</span>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                {alert.status === 'open' && <button onClick={() => handleAcknowledge(alert.id)} className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary-dark">Acknowledge</button>}
+                                {alert.status !== 'resolved' && <button onClick={() => handleResolve(alert.id)} className="px-4 py-2 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600">Resolve</button>}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// Analytics Component
+function Analytics() {
+    const [convertAnalytics, setConvertAnalytics] = useState(null);
+    const [voiceAnalytics, setVoiceAnalytics] = useState(null);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        Promise.all([api.get('/analytics/converts'), api.get('/analytics/voice-calls')]).then(([convertData, voiceData]) => {
+            setConvertAnalytics(convertData);
+            setVoiceAnalytics(voiceData);
+            setLoading(false);
+        });
+    }, []);
+    
+    if (loading) return <div className="flex items-center justify-center h-64"><i className="fas fa-spinner fa-spin text-3xl text-primary"></i></div>;
+    
+    const getOutcomeIcon = (outcome) => ({ completed: 'fa-check-circle text-green-500', voicemail: 'fa-voicemail text-yellow-500', no_answer: 'fa-phone-slash text-gray-500', failed: 'fa-times-circle text-red-500', callback_requested: 'fa-phone text-blue-500' }[outcome] || 'fa-phone');
+    
+    return (
+        <div className="space-y-6">
+            <h1 className="text-2xl font-bold text-gray-800">Analytics</h1>
+            
+            <div className="bg-white rounded-xl shadow-sm p-6">
+                <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2"><i className="fas fa-phone-alt text-primary"></i>Voice Call Analytics</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="text-center p-4 bg-gray-50 rounded-lg"><p className="text-3xl font-bold text-gray-800">{voiceAnalytics?.total_calls || 0}</p><p className="text-sm text-gray-500">Total Calls</p></div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg"><p className="text-3xl font-bold text-green-600">{voiceAnalytics?.completed || 0}</p><p className="text-sm text-gray-500">Completed</p></div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg"><p className="text-3xl font-bold text-blue-600">{voiceAnalytics?.success_rate || 0}%</p><p className="text-sm text-gray-500">Success Rate</p></div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg"><p className="text-3xl font-bold text-purple-600">{Math.round((voiceAnalytics?.average_duration_seconds || 0) / 60)}</p><p className="text-sm text-gray-500">Avg Duration (min)</p></div>
+                </div>
+                
+                {voiceAnalytics?.by_outcome && (
+                    <div className="mt-6">
+                        <h4 className="font-semibold text-gray-700 mb-3">Call Outcomes</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                            {Object.entries(voiceAnalytics.by_outcome).map(([outcome, count]) => (
+                                <div key={outcome} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                                    <i className={`fas ${getOutcomeIcon(outcome)}`}></i>
+                                    <div><p className="font-semibold text-sm">{count}</p><p className="text-xs text-gray-500 capitalize">{outcome.replace('_', ' ')}</p></div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <h3 className="font-bold text-gray-800 mb-4">Converts by Source</h3>
+                    <div className="space-y-3">
+                        {convertAnalytics?.by_source && Object.entries(convertAnalytics.by_source).map(([source, count]) => (
+                            <div key={source} className="flex items-center">
+                                <span className="w-24 text-sm text-gray-600 capitalize">{source}</span>
+                                <div className="flex-1 mx-3"><div className="h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-secondary rounded-full" style={{ width: `${(count / (convertAnalytics?.total || 1)) * 100}%` }}></div></div></div>
+                                <span className="w-10 text-sm font-medium text-gray-800">{count}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                    <h3 className="font-bold text-gray-800 mb-4">Monthly Trend</h3>
+                    <div className="space-y-3">
+                        {convertAnalytics?.monthly_trend && Object.entries(convertAnalytics.monthly_trend).sort().map(([month, count]) => (
+                            <div key={month} className="flex items-center">
+                                <span className="w-20 text-sm text-gray-600">{month}</span>
+                                <div className="flex-1 mx-3"><div className="h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-primary rounded-full" style={{ width: `${(count / 50) * 100}%` }}></div></div></div>
+                                <span className="w-10 text-sm font-medium text-gray-800">{count}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-sm p-6">
+                <h3 className="font-bold text-gray-800 mb-4">Health Score Distribution</h3>
+                <div className="grid grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200"><p className="text-2xl font-bold text-green-600">{convertAnalytics?.health_distribution?.excellent || 0}</p><p className="text-sm text-gray-600">Excellent (80-100)</p></div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg border-2 border-blue-200"><p className="text-2xl font-bold text-blue-600">{convertAnalytics?.health_distribution?.good || 0}</p><p className="text-sm text-gray-600">Good (60-79)</p></div>
+                    <div className="text-center p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200"><p className="text-2xl font-bold text-yellow-600">{convertAnalytics?.health_distribution?.fair || 0}</p><p className="text-sm text-gray-600">Fair (40-59)</p></div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200"><p className="text-2xl font-bold text-red-600">{convertAnalytics?.health_distribution?.poor || 0}</p><p className="text-sm text-gray-600">Poor (0-39)</p></div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Test Voice Agent Component - ElevenLabs Widget Embed
+function TestVoiceAgent() {
+    useEffect(() => {
+        if (!document.getElementById('elevenlabs-widget-script')) {
+            const script = document.createElement('script');
+            script.id = 'elevenlabs-widget-script';
+            script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
+            script.async = true;
+            document.body.appendChild(script);
+        }
+    }, []);
+    
+    return (
+        <div className="p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Test Voice Agent</h2>
+            <p className="text-gray-600 mb-8">Click the microphone button in the bottom right corner to start a conversation.</p>
+            <elevenlabs-convai agent-id="agent_1501kh6b7rt7e1d9kfw8c2jwa7rc"></elevenlabs-convai>
+        </div>
+    );
+}
+
+// Main App Component
+function App() {
+    const [user, setUser] = useState(null);
+    const [activeTab, setActiveTab] = useState('dashboard');
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) setUser(JSON.parse(savedUser));
+        setLoading(false);
+    }, []);
+    
+    if (loading) return <div className="flex items-center justify-center min-h-screen"><i className="fas fa-spinner fa-spin text-3xl text-primary"></i></div>;
+    if (!user) return <Login onLogin={setUser} />;
+    
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'dashboard': return <Dashboard />;
+            case 'kanban': return <KanbanBoard />;
+            case 'converts': return <Converts />;
+            case 'alerts': return <Alerts />;
+            case 'voice-agent': return <VoiceAgent />;
+            case 'test-voice-agent': return <TestVoiceAgent />;
+            case 'analytics': return <Analytics />;
+            default: return <Dashboard />;
+        }
+    };
+    
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} />
+            <main className="ml-64 p-8">{renderContent()}</main>
+        </div>
+    );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+    </script>
+</body>
+</html>

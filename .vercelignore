@@ -1,0 +1,50 @@
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Node modules (if any)
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local data backups
+*.backup
+*.bak
+
+# Documentation (not needed for deployment)
+docs/
+*.md
+
+# Scripts (not needed for deployment)
+scripts/
+
+# Demo data generation (not needed for deployment)
+data/
+
+# Old backend folder (using standalone-backend instead)
+backend/
+
+# Environment files (Vercel handles env vars)
+.env
+.env.local
+.env.*.local
