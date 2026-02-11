@@ -1487,6 +1487,63 @@ async def root():
 # Include router
 app.include_router(api_router)
 
+# Static files - serve frontend for non-API routes (monolithic deployment)
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+import pathlib
+
+# Try to serve static index.html for root and non-API paths
+@app.get("/", response_class=HTMLResponse)
+async def serve_root():
+    """Serve the frontend index.html for root path."""
+    # Look for index.html in various locations
+    possible_paths = [
+        pathlib.Path(__file__).parent.parent / "standalone-frontend" / "index.html",
+        pathlib.Path(__file__).parent / "standalone-frontend" / "index.html",
+        pathlib.Path("standalone-frontend") / "index.html",
+        pathlib.Path("index.html"),
+    ]
+    
+    for path in possible_paths:
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+    
+    # Fallback: return simple message if index.html not found
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Evangelism CRM Demo</title>
+        <style>
+            body { font-family: system-ui; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f5f5f5; }
+            .card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+            h1 { color: #d97706; margin-bottom: 1rem; }
+            p { color: #666; margin-bottom: 1.5rem; }
+            .btn { background: #d97706; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; display: inline-block; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>Evangelism CRM Demo</h1>
+            <p>Frontend not found. API is running correctly.</p>
+            <a href="/api/demo/info" class="btn">View API Info</a>
+        </div>
+    </body>
+    </html>
+    """)
+
+# Catch-all for other non-API routes (SPA support)
+@app.get("/{path:path}", response_class=HTMLResponse)
+async def serve_spa(path: str):
+    """Serve the frontend for any non-API, non-static path (SPA routing)."""
+    # Skip API routes and static files
+    if path.startswith("api/") or "." in path:
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    # Serve index.html for all other routes
+    return await serve_root()
+
 # Error handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):

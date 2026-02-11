@@ -1,17 +1,13 @@
 {
   "version": 2,
   "name": "evangelism-crm-demo",
-  "buildCommand": "cd standalone-frontend && npm run build",
-  "outputDirectory": "standalone-frontend/dist",
+  "buildCommand": "echo 'Build complete'",
   "installCommand": "pip install -r requirements.txt",
+  "framework": null,
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.py"
-    },
-    {
       "source": "/(.*)",
-      "destination": "/standalone-frontend/index.html"
+      "destination": "/api/index.py"
     }
   ],
   "headers": [
@@ -29,6 +25,15 @@
         {
           "key": "Access-Control-Allow-Headers",
           "value": "Content-Type, Authorization"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
         }
       ]
     }

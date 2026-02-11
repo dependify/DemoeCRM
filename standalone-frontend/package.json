@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npx http-server -p 3000 -c-1",
     "dev": "npx http-server -p 3000 -c-1 -o",
-    "build": "mkdir -p dist && cp index.html dist/"
+    "build": "mkdir -p dist && cp index.html dist/index.html"
   },
   "keywords": ["evangelism", "crm", "church", "demo"],
   "author": "Grace Evangelical Ministries",

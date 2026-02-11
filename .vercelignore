@@ -11,7 +11,7 @@ __pycache__/
 *.so
 .Python
 
-# Node modules (if any)
+# Node modules
 node_modules/
 
 # IDE
@@ -31,20 +31,22 @@ Thumbs.db
 *.backup
 *.bak
 
-# Documentation (not needed for deployment)
+# Documentation
 docs/
-*.md
 
-# Scripts (not needed for deployment)
+# Scripts
 scripts/
 
-# Demo data generation (not needed for deployment)
+# Data generation
 data/
 
-# Old backend folder (using standalone-backend instead)
+# Old backend
 backend/
 
-# Environment files (Vercel handles env vars)
+# Environment files
 .env
 .env.local
 .env.*.local
+
+# Include standalone-backend (needed for API)
+!standalone-backend/
