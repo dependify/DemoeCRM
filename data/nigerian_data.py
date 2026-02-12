@@ -630,11 +630,11 @@ def get_church_branches(main_church: Dict, count: int = 5) -> List[Dict]:
 # =============================================================================
 
 DEMO_CONFIG = {
-    "church_name": "Grace Evangelical Ministries",
+    "church_name": "Dependify Gospel Centre",
     "church_location": "Lagos, Nigeria",
     "demo_database_name": "evangelism_crm_demo",
     "demo_client_id": "demo-church-lagos",
-    "admin_email": "admin@graceevangelical.demo",
+    "admin_email": "admin@dependifygospel.demo",
     "admin_password": "Demo@2025",
     "default_workers_count": 15,
     "default_converts_count": 500,

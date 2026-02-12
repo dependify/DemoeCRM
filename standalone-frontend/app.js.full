@@ -108,7 +108,7 @@ const api = {
 
 // Login Component
 function Login({ onLogin }) {
-    const [email, setEmail] = useState('admin@graceevangelical.demo');
+    const [email, setEmail] = useState('admin@dependifygospel.demo');
     const [password, setPassword] = useState('Demo@2025');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -137,7 +137,7 @@ function Login({ onLogin }) {
                     <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
                         <i className="fas fa-church text-white text-2xl"></i>
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-800">Grace Evangelical Ministries</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">Dependify Gospel Centre</h1>
                     <p className="text-gray-500">Evangelism CRM - Demo</p>
                 </div>
                 
@@ -183,7 +183,7 @@ function Login({ onLogin }) {
                 
                 <div className="mt-6 p-4 bg-amber-50 rounded-lg text-sm text-gray-600">
                     <p className="font-medium mb-1">Demo Credentials:</p>
-                    <p>Email: admin@graceevangelical.demo</p>
+                    <p>Email: admin@dependifygospel.demo</p>
                     <p>Password: Demo@2025</p>
                 </div>
             </div>
@@ -215,7 +215,7 @@ function Sidebar({ activeTab, setActiveTab, user }) {
                         <i className="fas fa-church text-white"></i>
                     </div>
                     <div>
-                        <h2 className="font-bold text-gray-800">Grace Evangelical</h2>
+                        <h2 className="font-bold text-gray-800">Dependify Gospel</h2>
                         <p className="text-xs text-gray-500">Evangelism CRM</p>
                     </div>
                 </div>

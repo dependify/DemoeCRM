@@ -8,6 +8,6 @@
     "build": "mkdir -p dist && cp index.html dist/index.html"
   },
   "keywords": ["evangelism", "crm", "church", "demo"],
-  "author": "Grace Evangelical Ministries",
+  "author": "Dependify Gospel Centre",
   "license": "MIT"
 }

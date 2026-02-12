@@ -24,7 +24,7 @@ A complete, self-contained demo application with **Voice Agent** capability. Thi
 └─────────────────┘
 ```
 
-### Demo Church: Grace Evangelical Ministries
+### Demo Church: Dependify Gospel Centre
 - 📍 Ikeja, Lagos, Nigeria
 - 👥 2,500+ Members
 - 🎙️ **AI Voice Agent Enabled**
@@ -83,10 +83,10 @@ Frontend runs at: `http://localhost:3000`
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | admin@graceevangelical.demo | Demo@2025 |
-| Follow-up Leader | followup_leader1@graceevangelical.demo | Demo@2025 |
-| Follow-up Worker | followup_worker1@graceevangelical.demo | Demo@2025 |
-| Voice Agent | voice_agent1@graceevangelical.demo | Demo@2025 |
+| **Admin** | admin@dependifygospel.demo | Demo@2025 |
+| Follow-up Leader | followup_leader1@dependifygospel.demo | Demo@2025 |
+| Follow-up Worker | followup_worker1@dependifygospel.demo | Demo@2025 |
+| Voice Agent | voice_agent1@dependifygospel.demo | Demo@2025 |
 
 ## 🎙️ Voice Agent Feature
 

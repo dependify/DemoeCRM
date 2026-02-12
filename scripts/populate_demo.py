@@ -98,8 +98,8 @@ class DemoDataPopulator:
             "state": "Lagos",
             "country": "Nigeria",
             "phone": generate_nigerian_phone(),
-            "email": "info@graceevangelical.ng",
-            "website": "https://graceevangelical.ng",
+            "email": "info@dependifygospel.ng",
+            "website": "https://dependifygospel.ng",
             "pastor_in_charge": "Rev. Dr. Emmanuel Adeyemi",
             "founded_year": 2005,
             "member_count": 2500,
@@ -180,7 +180,7 @@ class DemoDataPopulator:
             user = {
                 "id": str(uuid.uuid4()),
                 "name": person["full_name"],
-                "email": f"{role.value}{i+1}@graceevangelical.demo",
+                "email": f"{role.value}{i+1}@dependifygospel.demo",
                 "username": f"{role.value}{i+1}",
                 "role": role.value,
                 "phone": person["phone"],
@@ -691,7 +691,7 @@ class DemoDataPopulator:
                 "description": "7-day email/SMS series for new converts",
                 "type": "onboarding",
                 "messages": [
-                    {"day": 1, "channel": "sms", "content": "Welcome to Grace Evangelical! We're excited to have you. Service is Sunday 9am."},
+                    {"day": 1, "channel": "sms", "content": "Welcome to Dependify Gospel! We're excited to have you. Service is Sunday 9am."},
                     {"day": 2, "channel": "email", "content": "Here's a guide to help you get started..."},
                     {"day": 3, "channel": "sms", "content": "Join us for midweek service tomorrow at 6pm!"},
                     {"day": 7, "channel": "email", "content": "How was your first week? We'd love to hear from you."},

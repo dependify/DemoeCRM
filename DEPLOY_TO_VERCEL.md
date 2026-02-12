@@ -89,7 +89,7 @@ This is a **monolithic deployment** where:
 
 After deployment, use these credentials to login:
 
-- **Email**: `admin@graceevangelical.demo`
+- **Email**: `admin@dependifygospel.demo`
 - **Password**: `Demo@2025`
 
 ## API Endpoints

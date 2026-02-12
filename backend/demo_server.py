@@ -97,11 +97,11 @@ async def demo_info():
     return {
         "name": "Evangelism CRM Demo",
         "version": "2.0.0-demo",
-        "church": "Grace Evangelical Ministries",
+        "church": "Dependify Gospel Centre",
         "location": "Lagos, Nigeria",
         "description": "Demo version with realistic Nigerian church data",
         "credentials": {
-            "admin_email": "admin@graceevangelical.demo",
+            "admin_email": "admin@dependifygospel.demo",
             "admin_password": "Demo@2025"
         },
         "features": [
@@ -246,7 +246,7 @@ async def root():
     return {
         "message": "Evangelism CRM API - Demo Mode",
         "version": "2.0.0-demo",
-        "church": "Grace Evangelical Ministries",
+        "church": "Dependify Gospel Centre",
         "location": "Lagos, Nigeria",
         "docs": "/docs"
     }

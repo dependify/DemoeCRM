@@ -65,11 +65,11 @@ python backend/demo_server.py
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | admin@graceevangelical.demo | Demo@2025 |
-| Follow-up Leader | followup_leader1@graceevangelical.demo | Demo@2025 |
-| Follow-up Worker | followup_worker1@graceevangelical.demo | Demo@2025 |
-| Data Entry | data_entry1@graceevangelical.demo | Demo@2025 |
-| Mentor | mentor1@graceevangelical.demo | Demo@2025 |
+| **Admin** | admin@dependifygospel.demo | Demo@2025 |
+| Follow-up Leader | followup_leader1@dependifygospel.demo | Demo@2025 |
+| Follow-up Worker | followup_worker1@dependifygospel.demo | Demo@2025 |
+| Data Entry | data_entry1@dependifygospel.demo | Demo@2025 |
+| Mentor | mentor1@dependifygospel.demo | Demo@2025 |
 
 ---
 
@@ -85,7 +85,7 @@ python backend/demo_server.py
 - ✅ **Playbooks** for retention strategies
 
 ### Demo Church
-- **Name**: Grace Evangelical Ministries
+- **Name**: Dependify Gospel Centre
 - **Location**: Ikeja, Lagos, Nigeria
 - **Denomination**: Pentecostal
 - **Members**: 2,500+

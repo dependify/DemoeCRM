@@ -21,11 +21,11 @@ This demo provides a fully functional instance of the Evangelism CRM system with
 
 ### Demo Church Profile
 
-**Grace Evangelical Ministries**
+**Dependify Gospel Centre**
 - 📍 15 Church Street, Ikeja, Lagos
 - 📞 +234 801 234 5678
-- 📧 info@graceevangelical.ng
-- 🌐 https://graceevangelical.ng
+- 📧 info@dependifygospel.ng
+- 🌐 https://dependifygospel.ng
 - 👥 2,500+ Members
 - 📅 Founded: 2005
 - ⛪ Denomination: Pentecostal
@@ -106,7 +106,7 @@ The demo uses a separate database to ensure complete isolation from production d
 {
   "id": "uuid",
   "name": "Pastor Chioma Okonkwo",
-  "email": "chioma.okonkwo@graceevangelical.demo",
+  "email": "chioma.okonkwo@dependifygospel.demo",
   "role": "followup_leader",
   "phone": "08098765432",
   "location": "Lagos",
@@ -320,9 +320,9 @@ GET /api/demo/info
 ```json
 {
   "name": "Evangelism CRM Demo",
-  "church": "Grace Evangelical Ministries",
+  "church": "Dependify Gospel Centre",
   "credentials": {
-    "admin_email": "admin@graceevangelical.demo",
+    "admin_email": "admin@dependifygospel.demo",
     "admin_password": "Demo@2025"
   }
 }
@@ -452,7 +452,7 @@ score = (
 
 ### Scenario 2: Follow-up Worker Dashboard
 
-**Login**: followup_worker1@graceevangelical.demo
+**Login**: followup_worker1@dependifygospel.demo
 
 **Activities**:
 - View assigned converts
@@ -462,7 +462,7 @@ score = (
 
 ### Scenario 3: Admin Analytics Review
 
-**Login**: admin@graceevangelical.demo
+**Login**: admin@dependifygospel.demo
 
 **Activities**:
 - Review dashboard metrics

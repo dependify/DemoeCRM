@@ -384,7 +384,7 @@ def populate_demo_data():
     db.users[admin_id] = {
         "id": admin_id,
         "name": "Pastor Emmanuel Adeyemi",
-        "email": "admin@graceevangelical.demo",
+        "email": "admin@dependifygospel.demo",
         "username": "admin",
         "role": UserRole.CLIENT_ADMIN.value,
         "phone": generate_phone(),
@@ -406,7 +406,7 @@ def populate_demo_data():
         db.users[user_id] = {
             "id": user_id,
             "name": person["full_name"],
-            "email": f"{role.value}{i+1}@graceevangelical.demo",
+            "email": f"{role.value}{i+1}@dependifygospel.demo",
             "username": f"{role.value}{i+1}",
             "role": role.value,
             "phone": person["phone"],
@@ -523,7 +523,7 @@ def populate_demo_data():
         "name": "Grace Voice Agent",
         "language": "en-NG",
         "voice_type": "female",
-        "greeting_template": "Hello, this is Grace Evangelical Ministries. Am I speaking with {convert_name}?",
+        "greeting_template": "Hello, this is Dependify Gospel Centre. Am I speaking with {convert_name}?",
         "script_template": """I'm calling to follow up on your recent visit to our church. 
 We wanted to know how you're doing and if you have any prayer requests. 
 We also wanted to invite you to our upcoming service this Sunday at 10 AM.""",
@@ -535,12 +535,12 @@ We also wanted to invite you to our upcoming service this Sunday at 10 AM.""",
     scripts = [
         {
             "name": "Welcome Call",
-            "content": "Hello {name}, welcome to Grace Evangelical! We're thrilled you joined us. How can we support your spiritual journey?",
+            "content": "Hello {name}, welcome to Dependify Gospel! We're thrilled you joined us. How can we support your spiritual journey?",
             "purpose": "welcome"
         },
         {
             "name": "Follow-up Call",
-            "content": "Hi {name}, this is {caller_name} from Grace Evangelical. Just checking in on you. Do you have any prayer requests?",
+            "content": "Hi {name}, this is {caller_name} from Dependify Gospel. Just checking in on you. Do you have any prayer requests?",
             "purpose": "followup"
         },
         {
@@ -605,7 +605,7 @@ We also wanted to invite you to our upcoming service this Sunday at 10 AM.""",
             messages = [
                 {"speaker": "agent", "message": f"Hello, may I speak with {convert['first_name']}?"},
                 {"speaker": "convert", "message": "Yes, this is me."},
-                {"speaker": "agent", "message": "This is Grace Evangelical calling. How are you doing today?"},
+                {"speaker": "agent", "message": "This is Dependify Gospel calling. How are you doing today?"},
                 {"speaker": "convert", "message": "I'm fine, thank you for calling."},
                 {"speaker": "agent", "message": "We'd love to see you at our service this Sunday."},
                 {"speaker": "convert", "message": "I'll try to make it. Thank you!"},
@@ -992,7 +992,7 @@ async def get_voice_agent_config(current_user: User = Depends(get_current_user))
             "name": "Grace Voice Agent",
             "language": "en-NG",
             "voice_type": "female",
-            "greeting_template": "Hello, this is Grace Evangelical Ministries. Am I speaking with {convert_name}?",
+            "greeting_template": "Hello, this is Dependify Gospel Centre. Am I speaking with {convert_name}?",
             "is_active": True,
         }
     return list(db.voice_agents.values())[0]
@@ -1209,7 +1209,7 @@ async def simulate_voice_call(
     conversation = [
         {"speaker": "agent", "message": f"Hello, may I speak with {convert.get('first_name', 'there')}?", "delay": 2},
         {"speaker": "convert", "message": "Yes, speaking. Who is this?", "delay": 3},
-        {"speaker": "agent", "message": "This is Grace Evangelical Ministries. We wanted to check on you and invite you to our service this Sunday.", "delay": 8},
+        {"speaker": "agent", "message": "This is Dependify Gospel Centre. We wanted to check on you and invite you to our service this Sunday.", "delay": 8},
         {"speaker": "convert", "message": "Oh, thank you for calling! I've been meaning to come back.", "delay": 5},
         {"speaker": "agent", "message": "That's wonderful! We have a special program this Sunday at 10 AM. Would you be able to make it?", "delay": 7},
         {"speaker": "convert", "message": "Yes, I'll definitely be there. Thank you for the reminder!", "delay": 4},
@@ -1415,7 +1415,7 @@ async def demo_info():
     return {
         "name": "Evangelism CRM - Standalone Demo",
         "version": "2.0.0",
-        "church": "Grace Evangelical Ministries",
+        "church": "Dependify Gospel Centre",
         "location": "Lagos, Nigeria",
         "description": "Complete standalone demo with Voice Agent feature",
         "features": [
@@ -1429,7 +1429,7 @@ async def demo_info():
             "Workflow Automation"
         ],
         "credentials": {
-            "admin_email": "admin@graceevangelical.demo",
+            "admin_email": "admin@dependifygospel.demo",
             "admin_password": "Demo@2025"
         }
     }
@@ -1575,7 +1575,7 @@ if __name__ == "__main__":
     print(f"API Docs:   http://localhost:{port}/docs")
     print(f"Demo Info: http://localhost:{port}/api/demo/info")
     print("\nLogin Credentials:")
-    print("   Email: admin@graceevangelical.demo")
+    print("   Email: admin@dependifygospel.demo")
     print("   Password: Demo@2025")
     print("\nVoice Agent feature enabled!")
     print("="*60 + "\n")

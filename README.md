@@ -5,7 +5,7 @@ A fully functional demo version of the Evangelism CRM system populated with real
 ## 🎯 What's Included
 
 ### Demo Church
-- **Name**: Grace Evangelical Ministries
+- **Name**: Dependify Gospel Centre
 - **Location**: Lagos, Nigeria
 - **Denomination**: Pentecostal
 - **Member Count**: 2,500+
@@ -132,11 +132,11 @@ npm start
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@graceevangelical.demo | Demo@2025 |
-| Follow-up Leader | followup_leader1@graceevangelical.demo | Demo@2025 |
-| Follow-up Worker | followup_worker1@graceevangelical.demo | Demo@2025 |
-| Data Entry | data_entry1@graceevangelical.demo | Demo@2025 |
-| Mentor | mentor1@graceevangelical.demo | Demo@2025 |
+| Admin | admin@dependifygospel.demo | Demo@2025 |
+| Follow-up Leader | followup_leader1@dependifygospel.demo | Demo@2025 |
+| Follow-up Worker | followup_worker1@dependifygospel.demo | Demo@2025 |
+| Data Entry | data_entry1@dependifygospel.demo | Demo@2025 |
+| Mentor | mentor1@dependifygospel.demo | Demo@2025 |
 
 ## 📊 Demo API Endpoints
 
