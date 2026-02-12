@@ -17,6 +17,7 @@ import uuid
 import bcrypt
 import logging
 import random
+import hashlib
 from pathlib import Path
 
 # Configure logging
@@ -371,6 +372,11 @@ def generate_nigerian_person(gender: str = None) -> Dict[str, Any]:
         "occupation": random.choice(OCCUPATIONS),
     }
 
+def get_deterministic_id(email: str) -> str:
+    """Generate a deterministic UUID based on email for consistent IDs across cold starts."""
+    import hashlib
+    return str(uuid.UUID(hashlib.md5(email.encode()).hexdigest()[:32]))
+
 def populate_demo_data():
     """Populate the demo database with sample data."""
     if db.initialized:
@@ -378,13 +384,14 @@ def populate_demo_data():
     
     logger.info("Populating demo data...")
     
-    # Create admin user
+    # Create admin user with deterministic ID
     admin_password = get_password_hash("Demo@2025")
-    admin_id = str(uuid.uuid4())
+    admin_email = "admin@dependifygospel.demo"
+    admin_id = get_deterministic_id(admin_email)
     db.users[admin_id] = {
         "id": admin_id,
         "name": "Pastor Emmanuel Adeyemi",
-        "email": "admin@dependifygospel.demo",
+        "email": admin_email,
         "username": "admin",
         "role": UserRole.CLIENT_ADMIN.value,
         "phone": generate_phone(),
@@ -395,18 +402,19 @@ def populate_demo_data():
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
     
-    # Create additional users
+    # Create additional users with deterministic IDs
     roles = [UserRole.FOLLOWUP_LEADER, UserRole.FOLLOWUP_WORKER, UserRole.DATA_ENTRY,
              UserRole.MENTOR, UserRole.COUNSELLING_LEADER, UserRole.WELFARE_OFFICER,
              UserRole.VOICE_AGENT]
     
     for i, role in enumerate(roles):
         person = generate_nigerian_person()
-        user_id = str(uuid.uuid4())
+        user_email = f"{role.value}{i+1}@dependifygospel.demo"
+        user_id = get_deterministic_id(user_email)
         db.users[user_id] = {
             "id": user_id,
             "name": person["full_name"],
-            "email": f"{role.value}{i+1}@dependifygospel.demo",
+            "email": user_email,
             "username": f"{role.value}{i+1}",
             "role": role.value,
             "phone": person["phone"],
@@ -421,9 +429,12 @@ def populate_demo_data():
         UserRole.FOLLOWUP_WORKER.value, UserRole.FOLLOWUP_LEADER.value, UserRole.MENTOR.value
     ]]
     
-    # Create converts
+    # Create converts with deterministic IDs
     stages = list(ConvertStage)
     stage_weights = [0.15, 0.30, 0.20, 0.15, 0.10, 0.05, 0.05]
+    
+    # Seed random for consistent data across cold starts
+    random.seed(42)
     
     for i in range(100):  # 100 converts for demo
         person = generate_nigerian_person()
@@ -431,7 +442,8 @@ def populate_demo_data():
         days_ago = random.randint(1, 180)
         created_at = datetime.now(timezone.utc) - timedelta(days=days_ago)
         
-        convert_id = str(uuid.uuid4())
+        # Deterministic ID based on index
+        convert_id = str(uuid.UUID(hashlib.md5(f"convert_{i}".encode()).hexdigest()[:32]))
         health_score = random.randint(20, 95)
         
         db.converts[convert_id] = {
@@ -462,9 +474,9 @@ def populate_demo_data():
             "created_by": admin_id,
         }
         
-        # Create health score record
+        # Create health score record with deterministic ID
         db.health_scores[convert_id] = {
-            "id": str(uuid.uuid4()),
+            "id": str(uuid.UUID(hashlib.md5(f"health_{convert_id}".encode()).hexdigest()[:32])),
             "convert_id": convert_id,
             "score": health_score,
             "factors": {
@@ -479,7 +491,7 @@ def populate_demo_data():
         
         # Create alerts for low health scores
         if health_score < 40:
-            alert_id = str(uuid.uuid4())
+            alert_id = str(uuid.UUID(hashlib.md5(f"alert_{convert_id}".encode()).hexdigest()[:32]))
             db.alerts[alert_id] = {
                 "id": alert_id,
                 "convert_id": convert_id,
@@ -496,7 +508,7 @@ def populate_demo_data():
     # Create services
     for i in range(20):
         service_date = date.today() - timedelta(days=random.randint(1, 120))
-        service_id = str(uuid.uuid4())
+        service_id = str(uuid.UUID(hashlib.md5(f"service_{i}".encode()).hexdigest()[:32]))
         db.services[service_id] = {
             "id": service_id,
             "title": f"Sunday Worship Service - {service_date.strftime('%B %d, %Y')}",
@@ -516,8 +528,8 @@ def populate_demo_data():
             "created_at": datetime.now(timezone.utc).isoformat(),
         }
     
-    # Create voice agent config
-    agent_id = str(uuid.uuid4())
+    # Create voice agent config with deterministic ID
+    agent_id = str(uuid.UUID(hashlib.md5("voice_agent_main".encode()).hexdigest()[:32]))
     db.voice_agents[agent_id] = {
         "id": agent_id,
         "name": "Grace Voice Agent",
@@ -555,8 +567,8 @@ We also wanted to invite you to our upcoming service this Sunday at 10 AM.""",
         }
     ]
     
-    for script in scripts:
-        script_id = str(uuid.uuid4())
+    for i, script in enumerate(scripts):
+        script_id = str(uuid.UUID(hashlib.md5(f"script_{script['name']}".encode()).hexdigest()[:32]))
         db.call_scripts[script_id] = {
             "id": script_id,
             "name": script["name"],
@@ -569,7 +581,7 @@ We also wanted to invite you to our upcoming service this Sunday at 10 AM.""",
     # Create some sample voice calls
     for i in range(15):
         convert = random.choice(list(db.converts.values()))
-        call_id = str(uuid.uuid4())
+        call_id = str(uuid.UUID(hashlib.md5(f"call_{i}_{convert['id']}".encode()).hexdigest()[:32]))
         scheduled_time = datetime.now(timezone.utc) + timedelta(hours=random.randint(-48, 48))
         
         status = random.choice(list(VoiceCallStatus))
@@ -610,8 +622,8 @@ We also wanted to invite you to our upcoming service this Sunday at 10 AM.""",
                 {"speaker": "agent", "message": "We'd love to see you at our service this Sunday."},
                 {"speaker": "convert", "message": "I'll try to make it. Thank you!"},
             ]
-            for msg in messages:
-                msg_id = str(uuid.uuid4())
+            for j, msg in enumerate(messages):
+                msg_id = str(uuid.UUID(hashlib.md5(f"msg_{call_id}_{j}".encode()).hexdigest()[:32]))
                 db.conversations[msg_id] = {
                     "id": msg_id,
                     "call_id": call_id,
