@@ -1458,11 +1458,24 @@ function App() {
     const [loading, setLoading] = useState(true);
     
     useEffect(() => {
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
-        setLoading(false);
+        // Small delay to ensure localStorage is ready and prevent flash
+        const timer = setTimeout(() => {
+            const savedUser = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            // Only set user if both user data AND token exist
+            if (savedUser && token) {
+                try {
+                    setUser(JSON.parse(savedUser));
+                } catch (e) {
+                    // Invalid JSON in localStorage, clear it
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('token');
+                }
+            }
+            setLoading(false);
+        }, 100);
+        
+        return () => clearTimeout(timer);
     }, []);
     
     const handleLogin = (userData) => {
@@ -1471,8 +1484,11 @@ function App() {
     
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <i className="fas fa-spinner fa-spin text-3xl text-primary"></i>
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="text-center">
+                    <i className="fas fa-spinner fa-spin text-4xl text-primary mb-4"></i>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
             </div>
         );
     }
